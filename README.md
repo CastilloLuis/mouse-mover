@@ -42,17 +42,21 @@ reaches the limit in your settings.
 While Mouse Mover is on, a timer fires at the interval you choose:
 
 ```mermaid
-flowchart LR
-    T([Timer fires]) --> P{Accessibility<br/>granted?}
-    P -- no --> W[Skip and show<br/>the warning icon]
-    P -- yes --> L{Screen<br/>locked?}
+flowchart TD
+    T([Timer fires]) --> P{Permission?}
+    P -- no --> W[Skip and show the warning icon]
+    P -- yes --> L{Screen locked?}
     L -- yes --> S1[Skip]
-    L -- no --> A{Button down, or<br/>input in the last 5 s?}
-    A -- yes --> S2[Skip: you are active]
-    A -- no --> M[Post mouseMoved<br/>1 px to the side]
-    M --> B[Post mouseMoved<br/>back to the start]
+    L -- no --> A{You are active?}
+    A -- yes --> S2[Skip]
+    A -- no --> M[Post mouseMoved 1 px to the side]
+    M --> B[Post mouseMoved back to the start]
     B --> R([Idle timer is back at 0])
 ```
+
+"You are active" means a mouse button is down, or there was real input in the
+last 5 seconds. Your own input already resets the idle timer, so a move is not
+needed then.
 
 The two events go to the HID event tap (`CGEvent.post(tap: .cghidEventTap)`).
 This is the same path as a real mouse, so the idle timer resets. A plain
